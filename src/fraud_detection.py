@@ -19,9 +19,6 @@ def _random_date(n):
     start = date(2024, 10, 1)
     return [start + timedelta(days=int(x)) for x in np.random.randint(0, 180, n)]
 
-# ─────────────────────────────────────────────
-# 1. SYNTHETIC DATA GENERATION
-# ─────────────────────────────────────────────
 
 def generate_transactions(n=10000):
     """
@@ -40,7 +37,7 @@ def generate_transactions(n=10000):
     records = []
     dates = _random_date(n)
     for i in range(n):
-        is_fraud = 1 if np.random.random() < 0.08 else 0  # ~8% fraud rate
+        is_fraud = 1 if np.random.random() < 0.08 else 0 
 
         amount = (
             np.random.exponential(scale=5000) + 50000
@@ -82,10 +79,6 @@ def _hour_weights(is_fraud):
     return weights / weights.sum()
 
 
-# ─────────────────────────────────────────────
-# 2. FEATURE ENGINEERING
-# ─────────────────────────────────────────────
-
 def engineer_features(df):
     """Encode categorical variables and create ML-ready feature matrix."""
     df = df.copy()
@@ -106,10 +99,6 @@ def engineer_features(df):
     ]
     return df, feature_cols
 
-
-# ─────────────────────────────────────────────
-# 3. ANOMALY DETECTION — ISOLATION FOREST
-# ─────────────────────────────────────────────
 
 def run_isolation_forest(df, feature_cols):
     """
@@ -135,10 +124,6 @@ def run_isolation_forest(df, feature_cols):
     print(f"   Fraud precision     : {anomaly_precision:.1f}%")
     return df
 
-
-# ─────────────────────────────────────────────
-# 4. FRAUD PROBABILITY — LOGISTIC REGRESSION
-# ─────────────────────────────────────────────
 
 def run_logistic_regression(df, feature_cols):
     """
@@ -171,10 +156,6 @@ def run_logistic_regression(df, feature_cols):
     return df, model
 
 
-# ─────────────────────────────────────────────
-# 5. RISK SCORE COMPUTATION
-# ─────────────────────────────────────────────
-
 def compute_risk_score(df):
     """
     Composite risk score (0–100) combining:
@@ -204,10 +185,6 @@ def compute_risk_score(df):
     return df
 
 
-# ─────────────────────────────────────────────
-# 6. VISUALIZATIONS
-# ─────────────────────────────────────────────
-
 def plot_all(df, output_dir="screenshots"):
     """Generate all output charts and dashboard screenshot."""
     os.makedirs(output_dir, exist_ok=True)
@@ -231,7 +208,7 @@ def plot_all(df, output_dir="screenshots"):
         "axes.facecolor": palette["card"],
     })
 
-    # ── Chart 1: Distribution of Transaction Amounts ──────────────────
+    # Chart 1: Distribution of Transaction Amounts
     fig, ax = plt.subplots(figsize=(10, 5))
     ax.hist(df[df["is_fraud"] == 0]["amount"], bins=60, alpha=0.7,
             color=palette["primary"], label="Legitimate", edgecolor="white")
@@ -246,7 +223,7 @@ def plot_all(df, output_dir="screenshots"):
     plt.close(fig)
     print("   ✓ Distribution of Transaction Amounts.png")
 
-    # ── Chart 2: Daily Average Transaction Amount ─────────────────────
+    # Chart 2: Daily Average Transaction Amount
     df["transaction_date"] = pd.to_datetime(df["transaction_date"])
     daily = df.groupby("transaction_date")["amount"].mean().reset_index()
     fig, ax = plt.subplots(figsize=(12, 5))
@@ -263,7 +240,7 @@ def plot_all(df, output_dir="screenshots"):
     plt.close(fig)
     print("   ✓ Daily Average Transaction Amount.png")
 
-    # ── Chart 3: Risk Score Distribution ─────────────────────────────
+    # Chart 3: Risk Score Distribution
     fig, ax = plt.subplots(figsize=(10, 5))
     colors_map = {"Low": palette["success"], "Medium": palette["warning"],
                   "High": "#F05252", "Critical": palette["danger"]}
@@ -279,7 +256,7 @@ def plot_all(df, output_dir="screenshots"):
     plt.close(fig)
     print("   ✓ Risk Score Distribution.png")
 
-    # ── Chart 4: Fraud by Payment Method ─────────────────────────────
+    # Chart 4: Fraud by Payment Method
     fraud_pm = df.groupby("payment_method")["is_fraud"].mean().sort_values(ascending=False) * 100
     fig, ax = plt.subplots(figsize=(9, 5))
     bars = ax.bar(fraud_pm.index, fraud_pm.values, color=palette["primary"],
@@ -295,7 +272,7 @@ def plot_all(df, output_dir="screenshots"):
     plt.close(fig)
     print("   ✓ Fraud Rate by Payment Method.png")
 
-    # ── Dashboard Screenshot ──────────────────────────────────────────
+    # Dashboard Screenshot
     _generate_dashboard(df, palette, output_dir)
 
 
@@ -413,11 +390,6 @@ def _generate_dashboard(df, palette, output_dir):
     plt.close(fig)
     print("   ✓ DashBoard.png")
 
-
-# ─────────────────────────────────────────────
-# 7. EXPORT FOR POWER BI / DATAVERSE
-# ─────────────────────────────────────────────
-
 def export_dataset(df, output_dir="data"):
     """Export processed dataset for Power BI import and Dataverse upload."""
     os.makedirs(output_dir, exist_ok=True)
@@ -433,35 +405,25 @@ def export_dataset(df, output_dir="data"):
     return out_path
 
 
-# ─────────────────────────────────────────────
-# MAIN PIPELINE
-# ─────────────────────────────────────────────
-
 if __name__ == "__main__":
     print("=" * 60)
     print("  AI-Powered Fraud Detection & Risk Scoring Platform")
     print("  Author: Anjali Khatri | O23BCA110060 | CU")
     print("=" * 60)
-
-    # Step 1 — Generate data
+   
     print("\n[0/4] Generating synthetic transaction data...")
     df = generate_transactions(n=10000)
     print(f"   Generated {len(df):,} transactions  |  Fraud rate: {df['is_fraud'].mean()*100:.1f}%")
 
-    # Step 2 — Features
     df, feature_cols = engineer_features(df)
 
-    # Step 3 — Models
     df = run_isolation_forest(df, feature_cols)
     df, model = run_logistic_regression(df, feature_cols)
-
-    # Step 4 — Risk scoring
+    
     df = compute_risk_score(df)
 
-    # Step 5 — Visualize
     plot_all(df, output_dir="screenshots")
 
-    # Step 6 — Export
     export_dataset(df, output_dir="data")
 
     print("\n✅ Pipeline complete!")
