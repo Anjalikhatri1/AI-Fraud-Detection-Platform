@@ -1,0 +1,150 @@
+# Power Automate Flow Documentation
+# AI-Powered Fraud Detection & Risk Scoring Platform
+# Author: Anjali Khatri | O23BCA110060
+
+# ─────────────────────────────────────────────────────────────
+# FLOW 1: Transaction Fraud Scoring Flow
+# Trigger: When a new row is added to the Transactions table in Dataverse
+# ─────────────────────────────────────────────────────────────
+
+Flow_Name: "Transaction_Fraud_Scoring_Flow"
+Trigger:
+  Type: Dataverse - When a row is added
+  Table: cr_transactions
+  Scope: Organization
+
+Steps:
+  1_Initialize_Variables:
+    - risk_score: Float = 0
+    - alert_required: Boolean = false
+    - risk_category: String = ""
+
+  2_Call_Fraud_Scoring_API:
+    Action: HTTP
+    Method: POST
+    URI: "https://your-api-endpoint.azurewebsites.net/api/score"
+    Headers:
+      Content-Type: application/json
+      Authorization: "Bearer @{variables('API_Key')}"
+    Body: |
+      {
+        "transaction_id": "@{triggerOutputs()?['body/cr_transactionid']}",
+        "amount": @{triggerOutputs()?['body/cr_amount']},
+        "payment_method": "@{triggerOutputs()?['body/cr_paymentmethod']}",
+        "device": "@{triggerOutputs()?['body/cr_device']}",
+        "hour_of_day": @{triggerOutputs()?['body/cr_hourofday']},
+        "is_new_payee": @{triggerOutputs()?['body/cr_isnewpayee']},
+        "velocity_1h": @{triggerOutputs()?['body/cr_velocity1h']}
+      }
+
+  3_Parse_API_Response:
+    Action: Parse JSON
+    Schema:
+      type: object
+      properties:
+        fraud_probability: { type: number }
+        risk_score: { type: number }
+        risk_category: { type: string }
+        anomaly_flag: { type: integer }
+
+  4_Set_Risk_Score:
+    Action: Set variable
+    Name: risk_score
+    Value: "@{body('Parse_API_Response')?['risk_score']}"
+
+  5_Classify_Risk:
+    Action: Condition
+    Condition: "@{variables('risk_score')} >= 60"
+    If_True:
+      Set alert_required: true
+      Set risk_category: "@{body('Parse_API_Response')?['risk_category']}"
+    If_False:
+      Set alert_required: false
+      Set risk_category: "Low"
+
+  6_Update_Transaction_Record:
+    Action: Dataverse - Update a row
+    Table: cr_transactions
+    Row_ID: "@{triggerOutputs()?['body/cr_transactionid']}"
+    Fields:
+      cr_riskscore: "@{variables('risk_score')}"
+      cr_riskcategory: "@{variables('risk_category')}"
+      cr_fraudprobability: "@{body('Parse_API_Response')?['fraud_probability']}"
+      cr_anomalyflag: "@{body('Parse_API_Response')?['anomaly_flag']}"
+      cr_status: "@{if(variables('alert_required'), 'Under Review', 'Approved')}"
+
+  7_Alert_Branch:
+    Condition: "@{variables('alert_required')} == true"
+    If_True:
+      7a_Create_Case:
+        Action: Dataverse - Add a new row
+        Table: cr_fraudcases
+        Fields:
+          cr_transactionid: "@{triggerOutputs()?['body/cr_transactionid']}"
+          cr_riskscore: "@{variables('risk_score')}"
+          cr_riskcategory: "@{variables('risk_category')}"
+          cr_status: "Open"
+          cr_assignedto: "Fraud Analyst Team"
+          cr_createdon: "@{utcNow()}"
+
+      7b_Send_Email_Alert:
+        Action: Office 365 Outlook - Send an email
+        To: "fraud-team@yourbank.com"
+        Subject: "⚠️ High Risk Transaction Detected - @{triggerOutputs()?['body/cr_transactionid']}"
+        Body: |
+          A high-risk transaction has been flagged.
+
+          Transaction ID : @{triggerOutputs()?['body/cr_transactionid']}
+          Amount         : ₹@{triggerOutputs()?['body/cr_amount']}
+          Risk Score     : @{variables('risk_score')} / 100
+          Risk Category  : @{variables('risk_category')}
+          Payment Method : @{triggerOutputs()?['body/cr_paymentmethod']}
+          Device         : @{triggerOutputs()?['body/cr_device']}
+
+          Please review in the Fraud Investigation Portal.
+
+      7c_Push_Notification:
+        Action: Notifications - Send me a mobile notification
+        Text: "🚨 @{variables('risk_category')} risk transaction ₹@{triggerOutputs()?['body/cr_amount']} — Score: @{variables('risk_score')}"
+
+
+# ─────────────────────────────────────────────────────────────
+# FLOW 2: Daily Risk Summary Report Flow
+# Trigger: Scheduled — every day at 8:00 AM IST
+# ─────────────────────────────────────────────────────────────
+
+Flow_Name: "Daily_Risk_Summary_Report"
+Trigger:
+  Type: Recurrence
+  Interval: 1
+  Frequency: Day
+  Start_Time: "2024-01-01T02:30:00Z"  # 8:00 AM IST = 2:30 AM UTC
+
+Steps:
+  1_List_Yesterdays_High_Risk:
+    Action: Dataverse - List rows
+    Table: cr_transactions
+    Filter: "cr_riskscore ge 60 and cr_createdon ge @{addDays(utcNow(), -1)}"
+    Order_By: cr_riskscore desc
+
+  2_Count_By_Category:
+    Action: Select + Compose
+    Count_Critical: "@{length(filter(outputs('List_rows')?['value'], item()?['cr_riskcategory'] == 'Critical'))}"
+    Count_High: "@{length(filter(outputs('List_rows')?['value'], item()?['cr_riskcategory'] == 'High'))}"
+
+  3_Send_Summary_Email:
+    Action: Office 365 Outlook - Send an email
+    To: "fraud-manager@yourbank.com"
+    Subject: "📊 Daily Fraud Risk Summary — @{formatDateTime(utcNow(), 'dd MMM yyyy')}"
+    Body: |
+      Good morning,
+
+      Here is your daily fraud risk summary for @{formatDateTime(addDays(utcNow(),-1), 'dd MMM yyyy')}:
+
+      ⛔ Critical Risk Transactions : @{variables('Count_Critical')}
+      🔴 High Risk Transactions     : @{variables('Count_High')}
+      📦 Total Flagged              : @{length(outputs('List_rows')?['value'])}
+
+      Please log in to the Fraud Investigation Portal for details.
+
+      — Automated Fraud Detection System
