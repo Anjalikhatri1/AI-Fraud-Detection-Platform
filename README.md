@@ -8,24 +8,6 @@ The system automatically analyzes incoming transactions, assigns a **0–100 ris
 
 ---
 
-## 🖥️ Dashboard Preview
-
-![Power BI Dashboard](screenshots/DashBoard.png)
-
----
-
-## 📊 Output Screenshots
-
-| Distribution of Transaction Amounts | Daily Average Transaction Amount |
-|---|---|
-| ![dist](screenshots/Distribution%20of%20Transaction%20Amounts.png) | ![daily](screenshots/Daily%20Average%20Transaction%20Amount.png) |
-
-| Risk Score Distribution | Fraud Rate by Payment Method |
-|---|---|
-| ![risk](screenshots/Risk%20Score%20Distribution.png) | ![pm](screenshots/Fraud%20Rate%20by%20Payment%20Method.png) |
-
----
-
 ## 🏗️ System Architecture
 
 ```
@@ -100,34 +82,6 @@ Risk Score = (fraud_probability × 60)
 | `matplotlib` | ≥ 3.7 | Visualizations & dashboard |
 | `seaborn` | ≥ 0.12 | Statistical plots |
 | `faker` | ≥ 20.0 | Synthetic data generation |
-
----
-
-## 📁 Repository Structure
-
-```
-AI-Fraud-Detection-Platform/
-│
-├── src/
-│   └── fraud_detection.py        # Core ML pipeline (main script)
-│
-├── screenshots/
-│   ├── DashBoard.png             # Full Power BI-style dashboard
-│   ├── Distribution of Transaction Amounts.png
-│   ├── Daily Average Transaction Amount.png
-│   ├── Risk Score Distribution.png
-│   └── Fraud Rate by Payment Method.png
-│
-├── data/
-│   └── fraud_dashboard_dataset.csv  # Generated dataset (10,000 rows)
-│
-├── docs/
-│   └── Project_Report.pdf        # Full BCA project report (173 pages)
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
 
 ---
 
