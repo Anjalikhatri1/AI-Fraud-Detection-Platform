@@ -8,35 +8,6 @@ The system automatically analyzes incoming transactions, assigns a **0–100 ris
 
 ---
 
-## 🏗️ System Architecture
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    USER INTERFACE LAYER                       │
-│              Microsoft Power Apps (Canvas + Model-Driven)     │
-└─────────────────────────┬────────────────────────────────────┘
-                          │  REST API / Power Fx
-┌─────────────────────────▼────────────────────────────────────┐
-│                   BUSINESS LOGIC LAYER                        │
-│         Microsoft Power Automate (Workflow Automation)        │
-│    ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│    │  Transaction │  │  AI Fraud    │  │  Alert & Case    │  │
-│    │  Ingestion   │→ │  Scoring API │→ │  Management      │  │
-│    └──────────────┘  └──────────────┘  └──────────────────┘  │
-└─────────────────────────┬────────────────────────────────────┘
-                          │
-┌─────────────────────────▼────────────────────────────────────┐
-│                      DATA LAYER                               │
-│              Microsoft Dataverse + Python ML Models           │
-│    ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
-│    │  Transaction │  │  Risk Score  │  │  Power BI        │  │
-│    │  Store       │  │  Engine      │  │  Analytics       │  │
-│    └──────────────┘  └──────────────┘  └──────────────────┘  │
-└──────────────────────────────────────────────────────────────┘
-```
-
----
-
 ## 🤖 AI / ML Models Used
 
 | Model | Type | Purpose |
