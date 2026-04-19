@@ -1,10 +1,5 @@
 # 🛡️ AI-Powered Low-Code Financial Fraud Detection & Risk Scoring Platform
 
-> **BCA Final Year Project** · Anjali Khatri · O23BCA110060 · Chandigarh University  
-> Mentor: Vikas Kumar Atray
-
----
-
 ## 📌 Project Overview
 
 This project presents a complete **AI-powered, low-code financial fraud detection and risk scoring platform** built for the Indian banking and fintech ecosystem. It combines **Microsoft Power Platform** (Power Apps, Power Automate, Dataverse, Power BI) with **Python-based AI/ML models** to detect fraudulent UPI, NEFT, RTGS, and IMPS transactions in real time.
@@ -203,20 +198,3 @@ Open `screenshots/DashBoard.png` for a full overview, or import `data/fraud_dash
 - Federated learning for privacy-preserving fraud detection
 
 ---
-
-## 🙏 Acknowledgements
-
-- **Mentor**: Vikas Kumar Atray, Chandigarh University
-- Inspired by: [saitejayaruva/AI-Powered-Fraud-Detection-Risk-Scoring-System](https://github.com/saitejayaruva/AI-Powered-Fraud-Detection-Risk-Scoring-System)
-- Microsoft Power Platform documentation & Microsoft Learn
-- Scikit-learn & open-source ML community
-
----
-
-## 📄 License
-
-This project is submitted as academic work for the **Bachelor of Computer Application (BCA)** degree at Chandigarh University (2023–2026). All rights reserved by the author.
-
----
-
-*Made with ❤️ by Anjali Khatri — feel free to connect and collaborate!*
