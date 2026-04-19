@@ -99,17 +99,13 @@ Steps:
         Text: "🚨 @{variables('risk_category')} risk transaction ₹@{triggerOutputs()?['body/cr_amount']} — Score: @{variables('risk_score')}"
 
 
-# ─────────────────────────────────────────────────────────────
-# FLOW 2: Daily Risk Summary Report Flow
-# Trigger: Scheduled — every day at 8:00 AM IST
-# ─────────────────────────────────────────────────────────────
 
 Flow_Name: "Daily_Risk_Summary_Report"
 Trigger:
   Type: Recurrence
   Interval: 1
   Frequency: Day
-  Start_Time: "2024-01-01T02:30:00Z"  # 8:00 AM IST = 2:30 AM UTC
+  Start_Time: "2024-01-01T02:30:00Z" 
 
 Steps:
   1_List_Yesterdays_High_Risk:
