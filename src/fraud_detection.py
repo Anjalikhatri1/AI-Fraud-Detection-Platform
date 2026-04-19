@@ -1,16 +1,3 @@
-"""
-AI-Powered Low-Code Financial Fraud Detection and Risk Scoring Platform
-Author: Anjali Khatri | BCA | Chandigarh University
-Enrollment: O23BCA110060
-
-This module implements the core fraud detection logic including:
-- Synthetic data generation (simulating Power Platform transaction feeds)
-- Anomaly detection (Isolation Forest)
-- Fraud probability scoring (Logistic Regression)
-- Risk score computation
-- Output export for Power BI / Dataverse integration
-"""
-
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta
