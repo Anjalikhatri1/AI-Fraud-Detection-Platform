@@ -1,11 +1,3 @@
--- ============================================================
--- Dataverse Schema — AI Fraud Detection Platform
--- Author: Anjali Khatri | O23BCA110060 | Chandigarh University
--- ============================================================
-
--- TABLE 1: Transactions (cr_transactions)
--- Primary data store for all incoming financial transactions
-
 CREATE TABLE cr_transactions (
     cr_transactionid        UNIQUEIDENTIFIER    PRIMARY KEY,    -- Auto-generated GUID
     cr_userid               NVARCHAR(50)        NOT NULL,       -- USR1234
