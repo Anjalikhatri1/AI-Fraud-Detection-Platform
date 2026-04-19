@@ -1,22 +1,21 @@
 CREATE TABLE cr_transactions (
-    cr_transactionid        UNIQUEIDENTIFIER    PRIMARY KEY,    -- Auto-generated GUID
-    cr_userid               NVARCHAR(50)        NOT NULL,       -- USR1234
-    cr_amount               DECIMAL(18,2)       NOT NULL,       -- Transaction amount ₹
-    cr_paymentmethod        NVARCHAR(50)        NOT NULL,       -- UPI / NEFT / RTGS / IMPS
-    cr_device               NVARCHAR(50)        NOT NULL,       -- Mobile / Desktop / Tablet
-    cr_state                NVARCHAR(100)       NOT NULL,       -- Indian state
-    cr_hourofday            INT                 NOT NULL,       -- 0–23
+    cr_transactionid        UNIQUEIDENTIFIER    PRIMARY KEY,
+    cr_userid               NVARCHAR(50)        NOT NULL,       
+    cr_amount               DECIMAL(18,2)       NOT NULL,      
+    cr_paymentmethod        NVARCHAR(50)        NOT NULL,       
+    cr_device               NVARCHAR(50)        NOT NULL,       
+    cr_state                NVARCHAR(100)       NOT NULL,       
+    cr_hourofday            INT                 NOT NULL,       
     cr_transactiondate      DATETIME            NOT NULL,
     cr_isnewpayee           BIT                 DEFAULT 0,
     cr_loginattempts        INT                 DEFAULT 1,
-    cr_velocity1h           INT                 DEFAULT 1,      -- Transactions in last 1 hour
-    -- AI Scoring Output (populated by Power Automate after API call)
-    cr_fraudprobability     DECIMAL(5,4)        DEFAULT NULL,   -- 0.0000 – 1.0000
-    cr_riskscore            DECIMAL(5,2)        DEFAULT NULL,   -- 0.00 – 100.00
-    cr_riskcategory         NVARCHAR(20)        DEFAULT NULL,   -- Low/Medium/High/Critical
+    cr_velocity1h           INT                 DEFAULT 1,      
+    cr_fraudprobability     DECIMAL(5,4)        DEFAULT NULL,   
+    cr_riskscore            DECIMAL(5,2)        DEFAULT NULL,   
+    cr_riskcategory         NVARCHAR(20)        DEFAULT NULL,
     cr_anomalyflag          BIT                 DEFAULT 0,
-    -- Status
-    cr_status               NVARCHAR(50)        DEFAULT 'Pending',  -- Pending/Approved/Under Review/Blocked
+    
+    cr_status               NVARCHAR(50)        DEFAULT 'Pending', 
     cr_isfraud              BIT                 DEFAULT 0,
     cr_createdon            DATETIME            DEFAULT GETUTCDATE(),
     cr_modifiedon           DATETIME            DEFAULT GETUTCDATE()
@@ -37,10 +36,10 @@ CREATE TABLE cr_fraudcases (
     cr_transactionid        UNIQUEIDENTIFIER    NOT NULL REFERENCES cr_transactions(cr_transactionid),
     cr_riskscore            DECIMAL(5,2)        NOT NULL,
     cr_riskcategory         NVARCHAR(20)        NOT NULL,
-    cr_status               NVARCHAR(50)        DEFAULT 'Open',  -- Open/In Progress/Resolved/Closed
+    cr_status               NVARCHAR(50)        DEFAULT 'Open',  
     cr_assignedto           NVARCHAR(100),
     cr_investigationnotes   NVARCHAR(MAX),
-    cr_resolution           NVARCHAR(100),      -- Confirmed Fraud / False Positive / Inconclusive
+    cr_resolution           NVARCHAR(100),     
     cr_createdon            DATETIME            DEFAULT GETUTCDATE(),
     cr_resolvedon           DATETIME            DEFAULT NULL,
     cr_modifiedon           DATETIME            DEFAULT GETUTCDATE()
@@ -54,11 +53,11 @@ CREATE TABLE cr_alerts (
     cr_alertid              UNIQUEIDENTIFIER    PRIMARY KEY,
     cr_transactionid        UNIQUEIDENTIFIER    REFERENCES cr_transactions(cr_transactionid),
     cr_caseid               UNIQUEIDENTIFIER    REFERENCES cr_fraudcases(cr_caseid),
-    cr_alerttype            NVARCHAR(50)        NOT NULL,    -- Email / Push / SMS
-    cr_severity             NVARCHAR(20)        NOT NULL,    -- High / Critical
+    cr_alerttype            NVARCHAR(50)        NOT NULL,    
+    cr_severity             NVARCHAR(20)        NOT NULL,   
     cr_message              NVARCHAR(500),
     cr_sentto               NVARCHAR(200),
-    cr_status               NVARCHAR(20)        DEFAULT 'Sent',   -- Sent / Delivered / Failed
+    cr_status               NVARCHAR(20)        DEFAULT 'Sent',  
     cr_createdon            DATETIME            DEFAULT GETUTCDATE()
 );
 
@@ -70,7 +69,7 @@ CREATE TABLE cr_users (
     cr_userid               UNIQUEIDENTIFIER    PRIMARY KEY,
     cr_displayname          NVARCHAR(100)       NOT NULL,
     cr_email                NVARCHAR(200)       NOT NULL UNIQUE,
-    cr_role                 NVARCHAR(50)        NOT NULL,    -- Fraud Analyst / Manager / Admin
+    cr_role                 NVARCHAR(50)        NOT NULL,   
     cr_isactive             BIT                 DEFAULT 1,
     cr_lastlogin            DATETIME,
     cr_createdon            DATETIME            DEFAULT GETUTCDATE()
@@ -97,22 +96,6 @@ INSERT INTO cr_riskconfiguration VALUES
     (NEWID(), 'auto_block_score',   '90',  'Auto-block transaction above this score', 'System', GETUTCDATE()),
     (NEWID(), 'alert_email',        'fraud-team@yourbank.com', 'Alert recipient email', 'System', GETUTCDATE());
 
-
--- ============================================================
--- Row-Level Security Policies (Dataverse Business Units)
--- ============================================================
-
--- Fraud Analyst: Read own assigned cases + all Pending/Open transactions
--- Manager:       Read all cases in their business unit
--- Admin:         Full access across all business units
-
--- Power Automate service account: Create/Update on cr_transactions, cr_fraudcases, cr_alerts
--- Power BI service principal:     Read-only on all tables
-
-
--- ============================================================
--- Useful Views for Power BI
--- ============================================================
 
 CREATE VIEW vw_high_risk_transactions AS
 SELECT
