@@ -1,12 +1,3 @@
-# Power Automate Flow Documentation
-# AI-Powered Fraud Detection & Risk Scoring Platform
-# Author: Anjali Khatri | O23BCA110060
-
-# ─────────────────────────────────────────────────────────────
-# FLOW 1: Transaction Fraud Scoring Flow
-# Trigger: When a new row is added to the Transactions table in Dataverse
-# ─────────────────────────────────────────────────────────────
-
 Flow_Name: "Transaction_Fraud_Scoring_Flow"
 Trigger:
   Type: Dataverse - When a row is added
